@@ -8,12 +8,10 @@ Tasks are saved to a JSON file so your list is always there when you return.
 ## 📸 Screenshots
 
 ### Main Menu
-![Main Menu Screenshot](<img width="2526" height="418" alt="menu png" src="https://github.com/user-attachments/assets/daf61325-3e5d-4f04-82f1-b59b3467b52c" />
-)
+![Main Menu Screenshot](https://github.com/user-attachments/assets/daf61325-3e5d-4f04-82f1-b59b3467b52c)
 
 ### Viewing Tasks (with colors)
-![View Tasks Screenshot](<img width="2518" height="186" alt="ViewTasks png" src="https://github.com/user-attachments/assets/3f89b04d-200e-4e1b-af12-fa431f90e6da" />
-)
+![View Tasks Screenshot](https://github.com/user-attachments/assets/3f89b04d-200e-4e1b-af12-fa431f90e6da)
 
 ---
 
