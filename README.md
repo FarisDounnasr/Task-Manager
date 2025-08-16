@@ -42,8 +42,19 @@ Tasks are saved to a JSON file so your list is always there when you return.
 
 ## 📦 Installation
 
+
+
 1. **Clone the repository**
    ```bash
    git clone https://github.com/FarisDounnasr/Task-Manager.git
+
+## 2️⃣ Install Dependencies
+
+Make sure you have Python 3.10+ installed.
+
+Then install the required package:
+
+```bash
+pip install colorama
    cd Task-Manager
 
