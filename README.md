@@ -1,4 +1,4 @@
-# 🧠 Intelligent Task Manager (CLI)
+#  Intelligent Task Manager (CLI)
 
 A **command-line task manager** written in Python that lets you add, view, search, and manage tasks with **due dates, sorting, and colorful visual indicators**.  
 Tasks are saved to a JSON file so your list is always there when you return.
@@ -15,7 +15,7 @@ Tasks are saved to a JSON file so your list is always there when you return.
 
 ---
 
-## 🚀 Features
+##  Features
 
 - **Add Tasks** — with optional due dates in `YYYY-MM-DD` format
 - **View Tasks** — sorted by due date, completed tasks pushed to the bottom
@@ -31,7 +31,7 @@ Tasks are saved to a JSON file so your list is always there when you return.
 
 ---
 
-## 🛠️ Built With
+##  Built With
 
 - **Python 3**
 - **colorama** — for colorful output
@@ -40,7 +40,7 @@ Tasks are saved to a JSON file so your list is always there when you return.
 
 ---
 
-## 🛠 Installation
+##  Installation
 
 Make sure you have **Python 3.10+** installed.
 
