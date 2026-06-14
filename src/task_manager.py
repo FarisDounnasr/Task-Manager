@@ -12,7 +12,7 @@ import os
 from datetime import datetime
 from colorama import Fore, Style, init
 from storage import save_tasks, load_tasks
-from task_service import get_due_text
+from task_service import get_due_text, display_task
 
 init(autoreset=True)
 
@@ -89,16 +89,7 @@ while True:
             sorted_tasks = sorted(tasks, key=get_sort_key)
 
             for i, task in enumerate(sorted_tasks):
-                status = "✅" if task["done"] else "❌"
-                title = task["title"]
-                due_str = task.get("due_date", "N/A")
-
-                due_text = get_due_text(task)
-                
-                if task["done"]:
-                    status = f"{Fore.GREEN}{status}{Style.RESET_ALL}"
-
-                print(f"{i+1}. {title} [{status}] — {due_text}")
+             display_task(task, i)
     elif choice == "3":
         """
         What it does: Marks a specified task as done.
@@ -144,7 +135,7 @@ while True:
         Complexity: O(n) for searching and displaying tasks.
         Edge cases: Handles no matches and empty task list.
         """
-        keyword = input("Enter a keyword to search for: ").lower()
+        keyword = input("Enter a keyword to search for: ").strip().lower()
 
         matching_tasks = []
         for i, task in enumerate(tasks):
@@ -156,35 +147,7 @@ while True:
         else:
             print(f"\nFound {len(matching_tasks)} matching task(s):")
             for i, task in matching_tasks:
-                status = "✅" if task["done"] else "❌"
                 title = task["title"]
-                due_str = task.get("due_date", "N/A")
-
-                if task["done"]:
-                    due_text = f"{Fore.GREEN}completed{Style.RESET_ALL}"
-                elif due_str != "N/A":
-                    try:
-                        due_date = datetime.strptime(due_str, "%Y-%m-%d").date()
-                        days_left = (due_date - datetime.today().date()).days
-
-                        if days_left > 1:
-                            due_text = f"{Fore.YELLOW}due in {days_left} days{Style.RESET_ALL}"
-                        elif days_left == 1:
-                            due_text = f"{Fore.YELLOW}due tomorrow{Style.RESET_ALL}"
-                        elif days_left == 0:
-                            due_text = f"{Fore.YELLOW}due today{Style.RESET_ALL}"
-                        else:
-                            due_text = f"{Fore.RED}overdue by {-days_left} days{Style.RESET_ALL}"
-                    except ValueError:
-                        due_text = "invalid date"
-                else:
-                    due_text = "no due date"
-
-                # Color-code status icon
-                if task["done"]:
-                    status = f"{Fore.GREEN}✅{Style.RESET_ALL}"
-                else:
-                    status = f"{Fore.RED}❌{Style.RESET_ALL}"
 
                 # Highlight keyword in title
                 title_lower = title.lower()
@@ -200,7 +163,7 @@ while True:
                     title_display = title
 
                 # Final display
-                print(f"{i+1}. {title_display} [{status}] — {due_text}")
+                display_task(task, i, title_display)
     elif choice == '6':
         """
         What it does: Exits the task manager program.

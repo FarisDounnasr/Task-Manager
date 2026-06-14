@@ -26,3 +26,16 @@ def get_due_text(task):
 
     except ValueError:
         return "invalid date"
+    
+def get_status_text(task):
+    if task["done"]:
+        return f"{Fore.GREEN}✅{Style.RESET_ALL}"
+    return f"{Fore.RED}❌{Style.RESET_ALL}"
+
+
+def display_task(task, index, title_display=None):
+    status = get_status_text(task)
+    title = title_display if title_display is not None else task["title"]
+    due_text = get_due_text(task)
+
+    print(f"{index + 1}. {title} [{status}] — {due_text}")
