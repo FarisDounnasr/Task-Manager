@@ -7,8 +7,6 @@ Error handling & edge cases: Handles invalid inputs, empty task list, and date p
 Performance notes: Suitable for small to medium task lists; uses JSON for persistence.
 dependencies: colorama for colored terminal output, json for data persistence.
 """
-import json
-import os
 from datetime import datetime
 from colorama import Fore, Style, init
 from storage import save_tasks, load_tasks
@@ -35,146 +33,122 @@ Edge cases: None.
 
 tasks = load_tasks()
 
-while True:
-    show_menu()
-    choice = input("Choose an option(1-6): ")
-    if choice == '1':  
-        """
-    What it does: Adds a new task with a title and due date.
-    Inputs/Outputs: Takes user input for title and due date; outputs confirmation message.
-    Invariants/assumptions: Title is a non-empty string; due date is in YYYY-MM-DD format.
-    Algorithm steps: Prompt for title and due date, validate date, append to tasks list, save tasks.
-    Complexity: O(1) for adding a task; O(n) for saving tasks.
-    Edge cases: Handles invalid date format.
-     """
-        title = input("Enter task title: ")
-        due_date_str = input("Enter due date (YYYY-MM-DD): ")
+def add_task(tasks):
+    title = input("Enter task title: ")
+    due_date_str = input("Enter due date (YYYY-MM-DD): ")
 
-        try:
-          due_date = datetime.strptime(due_date_str, "%Y-%m-%d").date()
-          tasks.append({
+    try:
+        datetime.strptime(due_date_str, "%Y-%m-%d").date()
+        tasks.append({
             "title": title,
             "done": False,
             "due_date": due_date_str
-          })
-          save_tasks(tasks)
-          print(f"Task '{title}' added with due date {due_date_str}.")
+        })
+        save_tasks(tasks)
+        print(f"Task '{title}' added with due date {due_date_str}.")
+    except ValueError:
+        print("Invalid date format. Please use YYYY-MM-DD.")
+
+def get_sort_key(task):
+    if task["done"]:
+        return datetime.max.date()  # push completed tasks to the bottom
+    due_str = task.get("due_date", "")
+
+    if due_str:
+        try:
+            return datetime.strptime(due_str, "%Y-%m-%d").date()
         except ValueError:
-         print("Invalid date format. Please use YYYY-MM-DD.")
-    elif choice == "2":
-        """
-        What it does: Displays all tasks sorted by due date, with color-coded statuses.
-        Inputs/Outputs: Outputs task list to console.   
-        Invariants/assumptions: Tasks have 'title', 'done', and optional 'due_date'.
-        Algorithm steps: Sort tasks, color-code based on status and due date, print tasks.
-        Complexity: O(n log n) for sorting; O(n) for displaying.
-        Edge cases: Handles empty task list and invalid/missing due dates.
-        """
-        if not tasks:
-            print("No tasks yet.")
-        else:
-            today = datetime.today().date()
+            return datetime.max.date()  # push invalid dates down
+    return datetime.max.date()  # push undated tasks down
 
-            def get_sort_key(task):
-                if task["done"]:
-                    return datetime.max.date()  # push completed tasks to the bottom
-                due_str = task.get("due_date", "")
-                if due_str:
-                    try:
-                        return datetime.strptime(due_str, "%Y-%m-%d").date()
-                    except ValueError:
-                        return datetime.max.date()  # push invalid dates down
-                return datetime.max.date()  # push undated tasks down
+def view_tasks(tasks):
+    if not tasks:
+        print("No tasks yet.")
+        return
+    
+    sorted_tasks = sorted(tasks, key=get_sort_key)
 
-            sorted_tasks = sorted(tasks, key=get_sort_key)
+    for i, task in enumerate(sorted_tasks):
+        display_task(task, i)
 
-            for i, task in enumerate(sorted_tasks):
-             display_task(task, i)
-    elif choice == "3":
-        """
-        What it does: Marks a specified task as done.
-        Inputs/Outputs: Takes user input for task number; outputs confirmation message.
-        Invariants/assumptions: Task number is valid and corresponds to an existing task.
-        Algorithm steps: Display tasks, prompt for task number, update status, save tasks.
-        Complexity: O(n) for displaying tasks; O(1) for updating status; O(n) for saving tasks.
-        Edge cases: Handles invalid task numbers and empty task list.
-        """
-        for i, task in enumerate(tasks):
-            print(f"{i+1}. {task['title']}")
-        index = int(input("Enter task number to mark as done: ")) - 1
-        if 0 <= index < len(tasks):
-            tasks[index]["done"] = True
-            save_tasks(tasks)
-            print("Task marked as done.")
-        else:
-            print("Invalid number.")
-    elif choice == '4':
-        """
-        What it does: Deletes a specified task from the list.
-        Inputs/Outputs: Takes user input for task number; outputs confirmation message.
-        Invariants/assumptions: Task number is valid and corresponds to an existing task.
-        Algorithm steps: Display tasks, prompt for task number, remove task, save tasks.
-        Complexity: O(n) for displaying tasks; O(1) for removing task; O(n) for saving tasks.
-        Edge cases: Handles invalid task numbers and empty task list.
-        """
-        for i, task in enumerate(tasks):
-            print(f"{i+1}. {task['title']}")
-        index = int(input("Enter task number to delete: ")) - 1
-        if 0 <= index < len(tasks):
-            removed = tasks.pop(index)
-            save_tasks(tasks)
-            print(f"Deleted task: {removed['title']}")
-        else:
-            print("Invalid number.")
-    elif choice == '5':
-        """
-        What it does: Searches tasks by a keyword and displays matching tasks with highlights.
-        Inputs/Outputs: Takes user input for keyword; outputs matching tasks to console.
-        Invariants/assumptions: Tasks have 'title', 'done', and optional 'due_date'.
-        Algorithm steps: Prompt for keyword, search tasks, color-code matches, print results.
-        Complexity: O(n) for searching and displaying tasks.
-        Edge cases: Handles no matches and empty task list.
-        """
-        keyword = input("Enter a keyword to search for: ").strip().lower()
+def mark_task_done(tasks):
+    for i, task in enumerate(tasks):
+        print(f"{i+1}. {task['title']}")
 
-        matching_tasks = []
-        for i, task in enumerate(tasks):
-            if keyword in task["title"].lower():
-                matching_tasks.append((i, task))
-            
-        if not matching_tasks:
-            print("No tasks found matching that keyword.")
-        else:
-            print(f"\nFound {len(matching_tasks)} matching task(s):")
-            for i, task in matching_tasks:
-                title = task["title"]
+    index = int(input("Enter task number to mark as done: ")) - 1
 
-                # Highlight keyword in title
-                title_lower = title.lower()
-                start = title_lower.find(keyword)
-                if start != -1:
-                    end = start + len(keyword)
-                    title_display = (
-                        title[:start]
-                        + f"{Fore.YELLOW}{title[start:end]}{Style.RESET_ALL}"
-                        + title[end:]
-                    )
-                else:
-                    title_display = title
-
-                # Final display
-                display_task(task, i, title_display)
-    elif choice == '6':
-        """
-        What it does: Exits the task manager program.
-        Inputs/Outputs: Outputs a goodbye message.
-        Invariants/assumptions: None.
-        Algorithm steps: Print goodbye message, break loop.
-        Complexity: O(1).
-        Edge cases: None.
-        """
-        print("Goodbye!")
-        break
+    if 0 <= index < len(tasks):
+        tasks[index]["done"] = True
+        save_tasks(tasks)
+        print("Task marked as done.")
     else:
-        print("Invalid choice, please try again.")
+        print("Invalid number.")
 
+def delete_task(tasks):
+    for i, task in enumerate(tasks):
+        print(f"{i+1}. {task['title']}")
+    index = int(input("Enter task number to delete: ")) - 1
+    if 0 <= index < len(tasks):
+        removed = tasks.pop(index)
+        save_tasks(tasks)
+        print(f"Deleted task: {removed['title']}")
+    else:
+        print("Invalid number.")
+
+def search_tasks(tasks):
+    keyword = input("Enter a keyword to search for: ").strip().lower()
+
+    matching_tasks = []
+    for i, task in enumerate(tasks):
+        if keyword in task["title"].lower():
+            matching_tasks.append((i, task))
+        
+    if not matching_tasks:
+        print("No tasks found matching that keyword.")
+    else:
+        print(f"\nFound {len(matching_tasks)} matching task(s):")
+        for i, task in matching_tasks:
+            title = task["title"]
+
+            # Highlight keyword in title
+            title_lower = title.lower()
+            start = title_lower.find(keyword)
+            if start != -1:
+                end = start + len(keyword)
+                title_display = (
+                    title[:start]
+                    + f"{Fore.YELLOW}{title[start:end]}{Style.RESET_ALL}"
+                    + title[end:]
+                )
+            else:
+                title_display = title
+
+            # Final display
+            display_task(task, i, title_display)
+def main():
+    while True:
+        show_menu()
+        choice = input("Choose an option(1-6): ")
+        if choice == '1':  
+            add_task(tasks)
+            
+        elif choice == "2":
+           view_tasks(tasks)
+
+        elif choice == "3":
+           mark_task_done(tasks)
+
+        elif choice == '4':
+            delete_task(tasks)
+        
+        elif choice == '5':
+            search_tasks(tasks)
+
+        elif choice == '6':
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid choice, please try again.")
+
+if __name__ == "__main__":
+    main()
