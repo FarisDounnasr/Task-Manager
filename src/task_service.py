@@ -15,7 +15,9 @@ def get_due_text(task):
         today = datetime.today().date()
         days_left = (due_date - today).days
 
-        if days_left > 1:
+        if days_left > 3:
+            return f"due in {days_left} days"
+        elif days_left > 1:
             return f"{Fore.YELLOW}due in {days_left} days{Style.RESET_ALL}"
         elif days_left == 1:
             return f"{Fore.YELLOW}due tomorrow{Style.RESET_ALL}"
