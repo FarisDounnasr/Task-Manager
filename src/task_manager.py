@@ -136,12 +136,26 @@ def mark_task_done(tasks):
     index = int(input("Enter task number to mark as done: ")) - 1
 
     if 0 <= index < len(tasks):
-        tasks[index]["done"] = True
-        save_tasks(tasks)
-        print("Task marked as done.")
+        task = tasks[index]
+        today = datetime.today().strftime("%Y-%m-%d")
+
+        if task.get("is_recurring"):
+            task["done"] = True
+            task["last_completed_date"] = today
+
+            if "completed_dates" not in task:
+                task["completed_dates"] = []
+
+            task["completed_dates"].append(today)
+
+            save_tasks(tasks)
+            print("Recurring task marked as completed for now.")
+        else:
+            task["done"] = True
+            save_tasks(tasks)
+            print("Task marked as done.")
     else:
         print("Invalid number.")
-
 def delete_task(tasks):
     for i, task in enumerate(tasks):
         print(f"{i+1}. {task['title']}")
