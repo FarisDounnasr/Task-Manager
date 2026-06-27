@@ -33,21 +33,79 @@ Edge cases: None.
 
 tasks = load_tasks()
 
+def choose_category():
+    categories = [
+        "Health",
+        "Study",
+        "Career",
+        "Personal",
+        "Chores",
+        "Social",
+        "Other",
+        "None"
+    ]
+
+    print("\nChoose a category:")
+    for i, category in enumerate(categories, start=1):
+        print(f"{i}. {category}")
+
+    choice = input("Enter category number: ").strip()
+
+    if not choice.isdigit():
+        return None
+
+    index = int(choice) - 1
+
+    if 0 <= index < len(categories):
+        selected = categories[index]
+        return None if selected == "None" else selected
+
+    return None
+
+
 def add_task(tasks):
     title = input("Enter task title: ")
     due_date_str = input("Enter due date (YYYY-MM-DD): ")
 
     try:
         datetime.strptime(due_date_str, "%Y-%m-%d").date()
-        tasks.append({
-            "title": title,
-            "done": False,
-            "due_date": due_date_str
-        })
-        save_tasks(tasks)
-        print(f"Task '{title}' added with due date {due_date_str}.")
     except ValueError:
         print("Invalid date format. Please use YYYY-MM-DD.")
+        return
+
+    category = choose_category()
+
+    recurring_input = input("Is this a recurring task? (y/n): ").strip().lower()
+    is_recurring = recurring_input == "y"
+
+    target_interval_days = None
+
+    if is_recurring:
+        interval_input = input(
+            "Optional starting interval in days (press Enter to skip): "
+        ).strip()
+
+        if interval_input:
+            if interval_input.isdigit():
+                target_interval_days = int(interval_input)
+            else:
+                print("Invalid interval. Task will be added without a target interval.")
+
+    task = {
+        "title": title,
+        "done": False,
+        "due_date": due_date_str,
+        "category": category,
+        "is_recurring": is_recurring,
+        "target_interval_days": target_interval_days,
+        "created_date": datetime.today().strftime("%Y-%m-%d"),
+        "completed_dates": [],
+        "last_completed_date": None
+    }
+
+    tasks.append(task)
+    save_tasks(tasks)
+    print(f"Task '{title}' added with due date {due_date_str}.")
 
 def get_sort_key(task):
     if task["done"]:

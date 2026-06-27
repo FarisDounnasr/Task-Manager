@@ -39,5 +39,9 @@ def display_task(task, index, title_display=None):
     status = get_status_text(task)
     title = title_display if title_display is not None else task["title"]
     due_text = get_due_text(task)
+    category = task.get("category")
 
-    print(f"{index + 1}. {title} [{status}] — {due_text}")
+    if category:
+        print(f"{index + 1}. {title} [{status}] - {due_text} - {category}")
+    else:
+        print(f"{index + 1}. {title} [{status}] - {due_text}")
