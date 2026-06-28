@@ -10,7 +10,8 @@ dependencies: colorama for colored terminal output, json for data persistence.
 from datetime import datetime
 from colorama import Fore, Style, init
 from storage import save_tasks, load_tasks
-from task_service import get_due_text, display_task
+from task_service import get_due_text, display_task, update_recurring_tasks
+from recommendation_service import get_recommended_tasks
 
 init(autoreset=True)
 
@@ -120,11 +121,27 @@ def get_sort_key(task):
     return datetime.max.date()  # push undated tasks down
 
 def view_tasks(tasks):
+    recommendations = get_recommended_tasks(tasks)
+
+    if recommendations:
+        print("\nRecommended Tasks")
+        print("-----------------")
+
+        for recommendation in recommendations:
+            rec_task = recommendation["task"]
+            print(f"• {rec_task['title']}")
+            print(f"  Reason: {recommendation['reason']}")
+
+        print()
+
     if not tasks:
         print("No tasks yet.")
         return
-    
+
     sorted_tasks = sorted(tasks, key=get_sort_key)
+
+    print("All Tasks")
+    print("---------")
 
     for i, task in enumerate(sorted_tasks):
         display_task(task, i)
@@ -198,6 +215,8 @@ def search_tasks(tasks):
             # Final display
             display_task(task, i, title_display)
 def main():
+    if update_recurring_tasks(tasks):
+        save_tasks(tasks)
     while True:
         show_menu()
         choice = input("Choose an option(1-6): ")
