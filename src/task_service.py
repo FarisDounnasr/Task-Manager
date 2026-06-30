@@ -45,3 +45,35 @@ def display_task(task, index, title_display=None):
         print(f"{index + 1}. {title} [{status}] - {due_text} - {category}")
     else:
         print(f"{index + 1}. {title} [{status}] - {due_text}")
+
+def update_recurring_tasks(tasks):
+    today = datetime.today().date()
+    updated = False
+
+    for task in tasks:
+        if not task.get("is_recurring"):
+            continue
+
+        if task.get("done") is not True:
+            continue
+
+        interval = task.get("target_interval_days")
+        if not isinstance(interval, int) or interval < 1:
+            continue
+
+        last_completed = task.get("last_completed_date")
+        if not last_completed:
+            continue
+
+        try:
+            last_completed_date = datetime.strptime(last_completed, "%Y-%m-%d").date()
+        except ValueError:
+            continue
+
+        days_since = (today - last_completed_date).days
+
+        if days_since >= interval:
+            task["done"] = False
+            updated = True
+
+    return updated
