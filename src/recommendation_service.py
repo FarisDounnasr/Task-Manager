@@ -20,7 +20,7 @@ def get_recommendation_reason(task):
     if interval:
         return f"Target interval is every {interval} day(s)."
 
-    return "Recurring task is currently active."
+    return "This recurring task has not been completed yet."
 
 
 def get_recommended_tasks(tasks):
