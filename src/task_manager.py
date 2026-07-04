@@ -12,6 +12,7 @@ from colorama import Fore, Style, init
 from storage import save_tasks, load_tasks
 from task_service import get_due_text, display_task, update_recurring_tasks
 from recommendation_service import get_recommended_tasks
+from statistics_service import get_statistics
 
 init(autoreset=True)
 
@@ -22,7 +23,8 @@ def show_menu():
     print("3. Mark Task as Done")
     print("4. Delete Task")
     print("5. Search Tasks by Keyword")  
-    print("6. Exit") 
+    print("6. View Statistics")
+    print("7. Exit") 
 """      
 Displays the main menu options to the user.
 Inputs/Outputs: None; prints menu to console.
@@ -214,12 +216,40 @@ def search_tasks(tasks):
 
             # Final display
             display_task(task, i, title_display)
+
+def view_statistics(tasks):
+    stats = get_statistics(tasks)
+
+    print("\nStatistics")
+    print("----------")
+    print(f"Total tasks:         {stats['total']}")
+    print(f"Completed tasks:     {stats['completed']}")
+    print(f"Active tasks:        {stats['active']}")
+    print(f"Recurring tasks:     {stats['recurring']}")
+    print(f"One-time tasks:      {stats['one_time']}")
+    print(f"Total completions:   {stats['total_completions']}")
+
+    if stats["most_active_category"] and stats["total_completions"] > 0:
+        name, count = stats["most_active_category"]
+        print(f"\nMost active category: {name} ({count} completions)")
+
+    if stats["category_counts"] and stats["total_completions"] > 0:
+        print("\nCategory breakdown")
+        print("------------------")
+
+        for category, count in sorted(
+            stats["category_counts"].items(),
+            key=lambda item: item[1],
+            reverse=True
+        ):
+            print(f"{category}: {count}")
+
 def main():
     if update_recurring_tasks(tasks):
         save_tasks(tasks)
     while True:
         show_menu()
-        choice = input("Choose an option(1-6): ")
+        choice = input("Choose an option(1-7): ")
         if choice == '1':  
             add_task(tasks)
             
@@ -236,6 +266,9 @@ def main():
             search_tasks(tasks)
 
         elif choice == '6':
+            view_statistics(tasks)
+
+        elif choice == '7':
             print("Goodbye!")
             break
         else:
