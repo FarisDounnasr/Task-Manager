@@ -19,7 +19,7 @@ init(autoreset=True)
 def show_menu():
     print("\nTask Manager")
     print("1. Add Task")
-    print("2. View Tasks")
+    print("2. View Menu")
     print("3. Mark Task as Done")
     print("4. Delete Task")
     print("5. Search Tasks by Keyword")  
@@ -122,7 +122,7 @@ def get_sort_key(task):
             return datetime.max.date()  # push invalid dates down
     return datetime.max.date()  # push undated tasks down
 
-def view_tasks(tasks):
+def view_all_tasks(tasks):
     recommendations = get_recommended_tasks(tasks)
 
     if recommendations:
@@ -244,6 +244,27 @@ def view_statistics(tasks):
         ):
             print(f"{category}: {count}")
 
+def view_menu(tasks):
+    while True:
+        print("\nView Options")
+        print("1. View All Tasks")
+        print("2. View Completion History")
+        print("3. Back")
+
+        choice = input("Choose an option (1-3): ")
+
+        if choice == "1":
+            view_all_tasks(tasks)
+
+        elif choice == "2":
+            print("Coming soon.")
+
+        elif choice == "3":
+            break
+
+        else:
+            print("Invalid choice.")
+
 def main():
     if update_recurring_tasks(tasks):
         save_tasks(tasks)
@@ -254,7 +275,7 @@ def main():
             add_task(tasks)
             
         elif choice == "2":
-           view_tasks(tasks)
+           view_menu(tasks)
 
         elif choice == "3":
            mark_task_done(tasks)
