@@ -257,13 +257,45 @@ def view_menu(tasks):
             view_all_tasks(tasks)
 
         elif choice == "2":
-            print("Coming soon.")
+            view_completion_history(tasks)
 
         elif choice == "3":
             break
 
         else:
             print("Invalid choice.")
+
+def view_completion_history(tasks):
+    print("\nCompletion History")
+    print("------------------")
+
+    has_recurring_history = False
+
+    for task in tasks:
+        if not task.get("is_recurring"):
+            continue
+
+        has_recurring_history = True
+        history = task.get("completed_dates", [])
+        count = len(history)
+
+        title_with_count = f"{task.get('title')} ({count} completion{'s' if count != 1 else ''})"
+        sep_length = max(len(title_with_count), 40)
+        separator = "=" * sep_length
+
+        print()
+        print(separator)
+        print(title_with_count)
+        print(separator)
+
+        if history:
+            for date in reversed(history):
+                print(date)
+        else:
+            print("No completion history")
+
+    if not has_recurring_history:
+        print("No completion history")
 
 def main():
     if update_recurring_tasks(tasks):
