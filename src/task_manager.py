@@ -158,19 +158,18 @@ def mark_task_done(tasks):
         task = tasks[index]
         today = datetime.today().strftime("%Y-%m-%d")
 
+        task["done"] = True
+
+        if "completed_dates" not in task:
+            task["completed_dates"] = []
+
+        task["completed_dates"].append(today)
+
         if task.get("is_recurring"):
-            task["done"] = True
             task["last_completed_date"] = today
-
-            if "completed_dates" not in task:
-                task["completed_dates"] = []
-
-            task["completed_dates"].append(today)
-
             save_tasks(tasks)
             print("Recurring task marked as completed for now.")
         else:
-            task["done"] = True
             save_tasks(tasks)
             print("Task marked as done.")
     else:
@@ -269,14 +268,14 @@ def view_completion_history(tasks):
     print("\nCompletion History")
     print("------------------")
 
-    has_recurring_history = False
+    has_history = False
 
     for task in tasks:
-        if not task.get("is_recurring"):
+        history = task.get("completed_dates", [])
+        if not history:
             continue
 
-        has_recurring_history = True
-        history = task.get("completed_dates", [])
+        has_history = True
         count = len(history)
 
         title_with_count = f"{task.get('title')} ({count} completion{'s' if count != 1 else ''})"
@@ -288,13 +287,10 @@ def view_completion_history(tasks):
         print(title_with_count)
         print(separator)
 
-        if history:
-            for date in reversed(history):
-                print(date)
-        else:
-            print("No completion history")
+        for date in reversed(history):
+            print(date)
 
-    if not has_recurring_history:
+    if not has_history:
         print("No completion history")
 
 def main():
