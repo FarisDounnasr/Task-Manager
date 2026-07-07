@@ -16,8 +16,27 @@ from statistics_service import get_statistics
 
 init(autoreset=True)
 
+def print_header(title):
+    border = "=" * max(len(title) + 4, 24)
+    print(f"\n{border}")
+    print(title)
+    print(border)
+
+
+def print_success(message):
+    print(f"Success: {message}")
+
+
+def print_error(message):
+    print(f"Error: {message}")
+
+
+def print_labeled_value(label, value, width=24):
+    print(f"{label:<{width}}{value}")
+
+
 def show_menu():
-    print("\nTask Manager")
+    print_header("Task Manager")
     print("1. Add Task")
     print("2. View Menu")
     print("3. Mark Task as Done")
@@ -48,7 +67,7 @@ def choose_category():
         "None"
     ]
 
-    print("\nChoose a category:")
+    print_header("Choose a Category")
     for i, category in enumerate(categories, start=1):
         print(f"{i}. {category}")
 
@@ -73,7 +92,7 @@ def add_task(tasks):
     try:
         datetime.strptime(due_date_str, "%Y-%m-%d").date()
     except ValueError:
-        print("Invalid date format. Please use YYYY-MM-DD.")
+        print_error("Please enter a valid date in YYYY-MM-DD format.")
         return
 
     category = choose_category()
@@ -92,7 +111,7 @@ def add_task(tasks):
             if interval_input.isdigit():
                 target_interval_days = int(interval_input)
             else:
-                print("Invalid interval. Task will be added without a target interval.")
+                print_error("Please enter a valid interval. The task will be added without a target interval.")
 
     task = {
         "title": title,
@@ -108,7 +127,7 @@ def add_task(tasks):
 
     tasks.append(task)
     save_tasks(tasks)
-    print(f"Task '{title}' added with due date {due_date_str}.")
+    print_success(f"Task '{title}' added with due date {due_date_str}.")
 
 def get_sort_key(task):
     if task["done"]:
@@ -126,8 +145,7 @@ def view_all_tasks(tasks):
     recommendations = get_recommended_tasks(tasks)
 
     if recommendations:
-        print("\nRecommended Tasks")
-        print("-----------------")
+        print_header("Recommended Tasks")
 
         for recommendation in recommendations:
             rec_task = recommendation["task"]
@@ -142,8 +160,7 @@ def view_all_tasks(tasks):
 
     sorted_tasks = sorted(tasks, key=get_sort_key)
 
-    print("All Tasks")
-    print("---------")
+    print_header("All Tasks")
 
     for i, task in enumerate(sorted_tasks):
         display_task(task, i)
@@ -168,12 +185,13 @@ def mark_task_done(tasks):
         if task.get("is_recurring"):
             task["last_completed_date"] = today
             save_tasks(tasks)
-            print("Recurring task marked as completed for now.")
+            print_success("Recurring task marked as completed for now.")
         else:
             save_tasks(tasks)
-            print("Task marked as done.")
+            print_success("Task marked as done.")
     else:
-        print("Invalid number.")
+        print_error("Please enter a valid task number.")
+        
 def delete_task(tasks):
     for i, task in enumerate(tasks):
         print(f"{i+1}. {task['title']}")
@@ -181,9 +199,9 @@ def delete_task(tasks):
     if 0 <= index < len(tasks):
         removed = tasks.pop(index)
         save_tasks(tasks)
-        print(f"Deleted task: {removed['title']}")
+        print_success(f"Deleted task: {removed['title']}")
     else:
-        print("Invalid number.")
+        print_error("Please enter a valid task number.")
 
 def search_tasks(tasks):
     keyword = input("Enter a keyword to search for: ").strip().lower()
@@ -194,9 +212,11 @@ def search_tasks(tasks):
             matching_tasks.append((i, task))
         
     if not matching_tasks:
+        print_header("Search Results")
         print("No tasks found matching that keyword.")
     else:
-        print(f"\nFound {len(matching_tasks)} matching task(s):")
+        print_header("Search Results")
+        print(f"Found {len(matching_tasks)} matching task(s):")
         for i, task in matching_tasks:
             title = task["title"]
 
@@ -219,33 +239,32 @@ def search_tasks(tasks):
 def view_statistics(tasks):
     stats = get_statistics(tasks)
 
-    print("\nStatistics")
-    print("----------")
-    print(f"Total tasks:         {stats['total']}")
-    print(f"Completed tasks:     {stats['completed']}")
-    print(f"Active tasks:        {stats['active']}")
-    print(f"Recurring tasks:     {stats['recurring']}")
-    print(f"One-time tasks:      {stats['one_time']}")
-    print(f"Total completions:   {stats['total_completions']}")
+    print_header("Statistics")
+    print_labeled_value("Total tasks:", stats['total'])
+    print_labeled_value("Completed tasks:", stats['completed'])
+    print_labeled_value("Active tasks:", stats['active'])
+    print_labeled_value("Recurring tasks:", stats['recurring'])
+    print_labeled_value("One-time tasks:", stats['one_time'])
+    print_labeled_value("Total completions:", stats['total_completions'])
 
     if stats["most_active_category"] and stats["total_completions"] > 0:
         name, count = stats["most_active_category"]
-        print(f"\nMost active category: {name} ({count} completions)")
+        print()
+        print_labeled_value("Most active category:", f"{name} ({count} completions)")
 
     if stats["category_counts"] and stats["total_completions"] > 0:
-        print("\nCategory breakdown")
-        print("------------------")
+        print_header("Category Breakdown")
 
         for category, count in sorted(
             stats["category_counts"].items(),
             key=lambda item: item[1],
             reverse=True
         ):
-            print(f"{category}: {count}")
+            print_labeled_value(f"{category}:", count)
 
 def view_menu(tasks):
     while True:
-        print("\nView Options")
+        print_header("View Options")
         print("1. View All Tasks")
         print("2. View Completion History")
         print("3. Back")
@@ -262,11 +281,10 @@ def view_menu(tasks):
             break
 
         else:
-            print("Invalid choice.")
+            print_error("Please choose a valid option.")
 
 def view_completion_history(tasks):
-    print("\nCompletion History")
-    print("------------------")
+    print_header("Completion History")
 
     has_history = False
 
@@ -321,7 +339,7 @@ def main():
             print("Goodbye!")
             break
         else:
-            print("Invalid choice, please try again.")
+            print_error("Please choose a valid option.")
 
 if __name__ == "__main__":
     main()
